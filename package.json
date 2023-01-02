@@ -1,0 +1,39 @@
+{
+  "name": "solidity-dynamic-array",
+  "version": "0.0.1",
+  "author": {
+    "name": "Kamil Planer",
+    "url": "https://github.com/MrKampla"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "contracts"
+  ],
+  "license": "MIT",
+  "description": "Resizable in-memory array for Solidity",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "clean": "forge clean",
+    "lint": "npm run lint:sol && npm run prettier:check",
+    "lint:sol": "solhint \"{src,test}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{json,md,sol,yml}\""
+  },
+  "devDependencies": {
+    "prettier": "^2.8.0",
+    "prettier-plugin-solidity": "^1.0.0",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "library",
+    "dynamic-array",
+    "smart-contracts",
+    "solidity"
+  ]
+}
