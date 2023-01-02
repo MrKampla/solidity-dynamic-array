@@ -20,7 +20,8 @@
     "lint": "npm run lint:sol && npm run prettier:check",
     "lint:sol": "solhint \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
-    "prettier:write": "prettier --write \"**/*.{json,md,sol,yml}\""
+    "prettier:write": "prettier --write \"**/*.{json,md,sol,yml}\"",
+    "docgen": "npx foundry-docgen"
   },
   "devDependencies": {
     "prettier": "^2.8.0",

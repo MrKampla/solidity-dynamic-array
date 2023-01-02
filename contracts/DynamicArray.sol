@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 /**
- * @dev Node is an element stored inside the linked list. Value is stored as bytes so it can be any basic
+ * @notice Node is an element stored inside the linked list. Value is stored as bytes so it can be any basic
  * type or struct, it just has to be encoded before storing and decoded after retreived from the list.
  * Node also contains references to the previous and next element in list. Node[] funcitons as a pointer,
  * if it's empty list, it's null. If it has one element, it's the pointer to the next node.
@@ -17,7 +17,7 @@ struct Node {
 }
 
 /**
- * @dev LinkedList is a dynamic array of Nodes. It contains the length of the list and a pointer to the
+ * @notice LinkedList is a dynamic array of Nodes. It contains the length of the list and a pointer to the
  * head of the list. If the list is empty, head is an empty array.
  * @param length The length of the list
  * @param head The head of the list
@@ -28,7 +28,7 @@ struct LinkedList {
 }
 
 /**
- * @dev This is a helper function to build a "pointer" to a Node. Technically, it is not a pointer but it functions as one.
+ * @notice This is a helper function to build a "pointer" to a Node. Technically, it is not a pointer but it functions as one.
  * It's used to set the previous and next
  * @param node The node to build a pointer to
  * @return nodePointer The pointer to the node passed as a parameter
