@@ -8,6 +8,7 @@
 
 Have you ever wanted to create a resizable, in-memory Solidity array? If you answered “yes”, then this library is for you.
 In order to create an in-memory Solidity Array, you have to specify its length upfront in order for the compiler to allocate enough memory. With solidity-dynamic-array package, you can use DynamicArray library together with LinkedList struct in order to fully utilize dynamic, resizable arrays.
+I was aiming to reproduce the JavaScript ES6 array methods, so you can enjoy functions such as map, filter and reduce etc. that we all know and love.
 
 ## Install
 
@@ -79,8 +80,8 @@ Node is an element stored inside the linked list. Value is stored as bytes, so i
 ```solidity
 struct Node {
   bytes value;
-  struct Node[] previous;
-  struct Node[] next;
+  Node[] previous;
+  Node[] next;
 }
 ```
 
@@ -91,7 +92,7 @@ LinkedList is a dynamic array of Nodes. It contains the length of the list and a
 ```solidity
 struct LinkedList {
   uint256 length;
-  struct Node[] head;
+  Node[] head;
 }
 ```
 
@@ -186,18 +187,54 @@ Removes the last value from the list
 | ---- | ----- | ------------------------------------ |
 | [0]  | bytes | value The value popped from the list |
 
+**tryPop**
+
+```solidity
+function tryPop(struct LinkedList list) internal pure returns (bool success, bytes removedItem)
+```
+
+Tries to pop the last value from list. If the list is empty, it returns false and does not revert.
+
+| Name | Type              | Description                    |
+| ---- | ----------------- | ------------------------------ |
+| list | struct LinkedList | The list to pop the value from |
+
+| Name        | Type  | Description                    |
+| ----------- | ----- | ------------------------------ |
+| success     | bool  | Whether the pop was successful |
+| removedItem | bytes | The value popped from the list |
+
 **getNode**
 
 ```solidity
 function getNode(struct LinkedList list, uint256 index) internal pure returns (struct Node)
 ```
 
-retreives the Node element at the specified index without removing it
+Retreives the Node element at the specified index without removing it
 
 | Name  | Type              | Description                        |
 | ----- | ----------------- | ---------------------------------- |
 | list  | struct LinkedList | The list to retreive the Node from |
 | index | uint256           | The index of the Node to retreive  |
+
+**tryGetNode**
+
+```solidity
+function tryGetNode(struct LinkedList list, uint256 index) internal pure returns (bool success, struct Node)
+```
+
+Tries to retreive the Node element at the specified index without removing it. If the index
+is out of bounds, it returns false and does not revert.
+
+| Name  | Type              | Description                        |
+| ----- | ----------------- | ---------------------------------- |
+| list  | struct LinkedList | The list to retreive the Node from |
+| index | uint256           | The index of the Node to retreive  |
+
+| Name    | Type        | Description                     |
+| ------- | ----------- | ------------------------------- |
+| success | bool        | Whether the call was successful |
+| [1]     | struct Node | The Node at the specified index |
 
 **get**
 
@@ -205,12 +242,31 @@ retreives the Node element at the specified index without removing it
 function get(struct LinkedList list, uint256 index) internal pure returns (bytes)
 ```
 
-retreives the value at the specified index without removing it
+Retreives the value at the specified index without removing it
 
 | Name  | Type              | Description                         |
 | ----- | ----------------- | ----------------------------------- |
 | list  | struct LinkedList | The list to retreive the value from |
 | index | uint256           | The index of the value to retreive  |
+
+**tryGet**
+
+```solidity
+function tryGet(struct LinkedList list, uint256 index) internal pure returns (bool success, bytes value)
+```
+
+Tries to retreive the value at the specified index without removing it. If the index
+is out of bounds, it returns false and does not revert.
+
+| Name  | Type              | Description                         |
+| ----- | ----------------- | ----------------------------------- |
+| list  | struct LinkedList | The list to retreive the value from |
+| index | uint256           | The index of the value to retreive  |
+
+| Name    | Type  | Description                      |
+| ------- | ----- | -------------------------------- |
+| success | bool  | Whether the call was successful  |
+| value   | bytes | The value at the specified index |
 
 **set**
 
@@ -226,6 +282,25 @@ Sets the value at the specified index
 | index | uint256           | The index of the value to set |
 | value | bytes             | The value to set              |
 
+**trySet**
+
+```solidity
+function trySet(struct LinkedList list, uint256 index, bytes value) internal pure returns (bool success)
+```
+
+Tries to set the value at the specified index. If the index is out of bounds, it returns
+false and does not revert.
+
+| Name  | Type              | Description                   |
+| ----- | ----------------- | ----------------------------- |
+| list  | struct LinkedList | The list to set the value in  |
+| index | uint256           | The index of the value to set |
+| value | bytes             | The value to set              |
+
+| Name    | Type | Description                     |
+| ------- | ---- | ------------------------------- |
+| success | bool | Whether the call was successful |
+
 **insert**
 
 ```solidity
@@ -240,19 +315,57 @@ Inserts a new value at the specified index
 | index | uint256           | The index to insert the value at |
 | value | bytes             | The value to insert              |
 
+**tryInsert**
+
+```solidity
+function tryInsert(struct LinkedList list, uint256 index, bytes value) internal pure returns (bool success)
+```
+
+Tries to insert a new value at the specified index. If the index is out of bounds, it
+returns false and does not revert.
+
+| Name  | Type              | Description                      |
+| ----- | ----------------- | -------------------------------- |
+| list  | struct LinkedList | The list to insert the value in  |
+| index | uint256           | The index to insert the value at |
+| value | bytes             | The value to insert              |
+
+| Name    | Type | Description                     |
+| ------- | ---- | ------------------------------- |
+| success | bool | Whether the call was successful |
+
 **insertAll**
 
 ```solidity
 function insertAll(struct LinkedList list, uint256 index, bytes[] values) internal pure
 ```
 
-inserts an array of values at the specified index
+Inserts an array of values at the specified index
 
 | Name   | Type              | Description                       |
 | ------ | ----------------- | --------------------------------- |
 | list   | struct LinkedList | The list to insert the values in  |
 | index  | uint256           | The index to insert the values at |
 | values | bytes[]           | The values to insert              |
+
+**tryInsertAll**
+
+```solidity
+function tryInsertAll(struct LinkedList list, uint256 index, bytes[] values) internal pure returns (bool success)
+```
+
+Tries to insert an array of values at the specified index. If the index is out of bounds,
+it returns false and does not revert.
+
+| Name   | Type              | Description                       |
+| ------ | ----------------- | --------------------------------- |
+| list   | struct LinkedList | The list to insert the values in  |
+| index  | uint256           | The index to insert the values at |
+| values | bytes[]           | The values to insert              |
+
+| Name    | Type | Description                     |
+| ------- | ---- | ------------------------------- |
+| success | bool | Whether the call was successful |
 
 **appendAll**
 
@@ -350,7 +463,7 @@ gets the index of the first occurance of the specified value
 function lastIndexOf(struct LinkedList list, bytes value) internal pure returns (int256)
 ```
 
-gets the index of the last occurance of the specified value
+Gets the index of the last occurance of the specified value
 
 | Name  | Type              | Description             |
 | ----- | ----------------- | ----------------------- |
@@ -359,7 +472,7 @@ gets the index of the last occurance of the specified value
 
 | Name | Type   | Description                                                                                   |
 | ---- | ------ | --------------------------------------------------------------------------------------------- |
-| [0]  | int256 | the index of the last occurance of the specified value, or -1 if the value is not in the list |
+| [0]  | int256 | The index of the last occurance of the specified value, or -1 if the value is not in the list |
 
 **contains**
 
@@ -391,17 +504,211 @@ Removes the first occurance of the specified value
 | list  | struct LinkedList | The list to remove the value from |
 | index | uint256           | The index of the value to remove  |
 
+**tryRemove**
+
+```solidity
+function tryRemove(struct LinkedList list, uint256 index) internal pure returns (bool success)
+```
+
+Tries to removes the the element at the specified index. Returns false
+if the index is out of bounds and does not revert.
+
+| Name  | Type              | Description                       |
+| ----- | ----------------- | --------------------------------- |
+| list  | struct LinkedList | The list to remove the value from |
+| index | uint256           | The index of the value to remove  |
+
+| Name    | Type | Description                                      |
+| ------- | ---- | ------------------------------------------------ |
+| success | bool | true if the element was removed, false otherwise |
+
 **toArray**
 
 ```solidity
 function toArray(struct LinkedList list) internal pure returns (bytes[])
 ```
 
-creates a solidity array from the linked list
+Creates a solidity array from the linked list
 
 | Name | Type              | Description         |
 | ---- | ----------------- | ------------------- |
-| list | struct LinkedList | the list to convert |
+| list | struct LinkedList | The list to convert |
+
+**slice**
+
+```solidity
+function slice(struct LinkedList list, uint256 _from, uint256 _to) internal pure returns (struct LinkedList)
+```
+
+Creates a new list that only contains the elements between the specified range of the original list
+
+| Name   | Type              | Description                               |
+| ------ | ----------------- | ----------------------------------------- |
+| list   | struct LinkedList | The list to slice                         |
+| \_from | uint256           | The index of the first element to include |
+| \_to   | uint256           | The index of the last element to include  |
+
+| Name | Type              | Description     |
+| ---- | ----------------- | --------------- |
+| [0]  | struct LinkedList | the sliced list |
+
+**merge**
+
+```solidity
+function merge(struct LinkedList list, struct LinkedList _other) internal pure
+```
+
+Merges two lists together by appending the second list at the end of the first. The other list
+will be deep copied so it can be safely modified after this operation without affecting the result list.
+
+| Name    | Type              | Description                        |
+| ------- | ----------------- | ---------------------------------- |
+| list    | struct LinkedList | The list to append to              |
+| \_other | struct LinkedList | The list to be copied and appended |
+
+**concat**
+
+```solidity
+function concat(struct LinkedList list, struct LinkedList other) internal pure returns (struct LinkedList)
+```
+
+Creates a new list that is a result of concatenation of the lists passed as arguments. Both lists
+will be deep copied so they can be safely modified after this operation without affecting the result list.
+
+| Name  | Type              | Description                    |
+| ----- | ----------------- | ------------------------------ |
+| list  | struct LinkedList | The first list to concatenate  |
+| other | struct LinkedList | The second list to concatenate |
+
+| Name | Type              | Description                                                                           |
+| ---- | ----------------- | ------------------------------------------------------------------------------------- |
+| [0]  | struct LinkedList | newList A new list that is a result of concatenation of the lists passed as arguments |
+
+**deepCopy**
+
+```solidity
+function deepCopy(struct LinkedList list) internal pure returns (struct LinkedList copiedList)
+```
+
+Creates a deep copy of the list
+
+| Name | Type              | Description      |
+| ---- | ----------------- | ---------------- |
+| list | struct LinkedList | The list to copy |
+
+| Name       | Type              | Description                 |
+| ---------- | ----------------- | --------------------------- |
+| copiedList | struct LinkedList | A copy of the original list |
+
+**some**
+
+```solidity
+function some(struct LinkedList list, function (bytes,uint256) view returns (bool) callback) internal view returns (bool)
+```
+
+Iterates over the list and calls the callback function for each element in order to check
+if the condition is met for at least one element. Callbacks are only executed until one of the callback
+invocations returns true.
+
+| Name     | Type                                         | Description                                                                                |
+| -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| list     | struct LinkedList                            | The list to iterate over                                                                   |
+| callback | function (bytes,uint256) view returns (bool) | The function to call for each element. It accepts the element and the index as parameters. |
+
+**every**
+
+```solidity
+function every(struct LinkedList list, function (bytes,uint256) view returns (bool) callback) internal view returns (bool)
+```
+
+Iterates over the list and calls the callback function for each element in order to check
+if the condition is met for all elements. Callbacks are only executed until one of the callback
+invocations returns false.
+
+| Name     | Type                                         | Description                                                                                |
+| -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| list     | struct LinkedList                            | The list to iterate over                                                                   |
+| callback | function (bytes,uint256) view returns (bool) | The function to call for each element. It accepts the element and the index as parameters. |
+
+| Name | Type | Description                                                         |
+| ---- | ---- | ------------------------------------------------------------------- |
+| [0]  | bool | true If the callback returns true for all elements, false otherwise |
+
+**forEach**
+
+```solidity
+function forEach(struct LinkedList list, function (bytes,uint256) callback) internal
+```
+
+Iterates over the list and calls the callback function for each element
+
+| Name     | Type                     | Description                                                                               |
+| -------- | ------------------------ | ----------------------------------------------------------------------------------------- |
+| list     | struct LinkedList        | The list to iterate over                                                                  |
+| callback | function (bytes,uint256) | The function to call for each element. It accepts the element and the index as parameters |
+
+**map**
+
+```solidity
+function map(struct LinkedList list, function (bytes,uint256) view returns (bytes) callback) internal view returns (struct LinkedList)
+```
+
+Creates a new list with elements that are the result of calling the callback function for each element
+
+| Name     | Type                                          | Description                                                                                                      |
+| -------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                             | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (bytes) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+**filter**
+
+```solidity
+function filter(struct LinkedList list, function (bytes,uint256) view returns (bool) callback) internal view returns (struct LinkedList)
+```
+
+Filters the list and creates a new list with the elements that match the condition
+
+| Name     | Type                                         | Description                                                                                                 |
+| -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                            | The list to filter                                                                                          |
+| callback | function (bytes,uint256) view returns (bool) | The function to check if element matches the condition. It accepts the element and the index as parameters. |
+
+| Name | Type              | Description                                                        |
+| ---- | ----------------- | ------------------------------------------------------------------ |
+| [0]  | struct LinkedList | filteredList A new list with the elements that match the condition |
+
+**reduce**
+
+```solidity
+function reduce(struct LinkedList list, function (bytes,bytes,uint256) view returns (bytes) callback, bytes initialValue) internal view returns (bytes)
+```
+
+Reduces the list to a single value by calling the callback function for each element
+
+| Name         | Type                                                | Description                                                                                                         |
+| ------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| list         | struct LinkedList                                   | The list to reduce                                                                                                  |
+| callback     | function (bytes,bytes,uint256) view returns (bytes) | The function to call for each element. It accepts the accumulator, the current element and the index as parameters. |
+| initialValue | bytes                                               | The initial value of the accumulator                                                                                |
+
+| Name | Type  | Description                                    |
+| ---- | ----- | ---------------------------------------------- |
+| [0]  | bytes | accumulator The final value of the accumulator |
+
+**sort**
+
+```solidity
+function sort(struct LinkedList list, function (bytes,bytes) view returns (int256) callback) internal view
+```
+
+Sorts the list using quicksort algorithm
+
+_The input list is not copied, so the original list is modified_
+
+| Name     | Type                                         | Description                                                                                                                                                                                                                                           |
+| -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                            | The list to sort                                                                                                                                                                                                                                      |
+| callback | function (bytes,bytes) view returns (int256) | The function to compare two elements. It accepts two elements and returns: -1 if the first element is smaller than the second element 0 if the first element is equal to the second element 1 if the first element is greater than the second element |
 
 ## Author
 

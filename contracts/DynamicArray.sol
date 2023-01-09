@@ -120,7 +120,7 @@ library DynamicArray {
   }
 
   /**
-   * @notice Removes the last value from the list
+   * @notice Removes the last value from the list. Reverts when there is no element to remove.
    * @param list The list to pop the value from
    * @return value The value popped from the list
    */
@@ -141,9 +141,25 @@ library DynamicArray {
   }
 
   /**
-   * @notice retreives the Node element at the specified index without removing it
+   * @notice Tries to pop the last value from list. If the list is empty, it returns false and does not revert.
+   * @param list The list to pop the value from
+   * @return success Whether the pop was successful
+   * @return removedItem The value popped from the list
+   */
+  function tryPop(
+    LinkedList memory list
+  ) internal pure returns (bool success, bytes memory removedItem) {
+    if (list.length == 0) {
+      return (false, bytes(''));
+    }
+    return (true, pop(list));
+  }
+
+  /**
+   * @notice Retreives the Node element at the specified index without removing it
    * @param list The list to retreive the Node from
    * @param index The index of the Node to retreive
+   * @return node The Node at the specified index
    */
   function getNode(
     LinkedList memory list,
@@ -158,7 +174,29 @@ library DynamicArray {
   }
 
   /**
-   * @notice retreives the value at the specified index without removing it
+   * @notice Tries to retreive the Node element at the specified index without removing it. If the index
+   * is out of bounds, it returns false and does not revert.
+   * @param list The list to retreive the Node from
+   * @param index The index of the Node to retreive
+   * @return success Whether the call was successful
+   * @return node The Node at the specified index
+   */
+  function tryGetNode(
+    LinkedList memory list,
+    uint256 index
+  ) internal pure returns (bool success, Node memory) {
+    if (index >= list.length) {
+      return (false, Node(bytes(''), new Node[](0), new Node[](0)));
+    }
+    Node memory node = list.head[0];
+    for (uint256 i = 0; i < index; i++) {
+      node = node.next[0];
+    }
+    return (true, node);
+  }
+
+  /**
+   * @notice Retreives the value at the specified index without removing it
    * @param list The list to retreive the value from
    * @param index The index of the value to retreive
    */
@@ -170,6 +208,24 @@ library DynamicArray {
   }
 
   /**
+   * @notice Tries to retreive the value at the specified index without removing it. If the index
+   * is out of bounds, it returns false and does not revert.
+   * @param list The list to retreive the value from
+   * @param index The index of the value to retreive
+   * @return success Whether the call was successful
+   * @return value The value at the specified index
+   */
+  function tryGet(
+    LinkedList memory list,
+    uint256 index
+  ) internal pure returns (bool success, bytes memory value) {
+    Node memory node;
+    (success, node) = tryGetNode(list, index);
+
+    return (success, node.value);
+  }
+
+  /**
    * @notice Sets the value at the specified index
    * @param list The list to set the value in
    * @param index The index of the value to set
@@ -177,6 +233,26 @@ library DynamicArray {
    */
   function set(LinkedList memory list, uint256 index, bytes memory value) internal pure {
     require(index < list.length, 'Index out of bounds');
+    Node memory node = getNode(list, index);
+    node.value = value;
+  }
+
+  /**
+   * @notice Tries to set the value at the specified index. If the index is out of bounds, it returns
+   * false and does not revert.
+   * @param list The list to set the value in
+   * @param index The index of the value to set
+   * @param value The value to set
+   * @return success Whether the call was successful
+   */
+  function trySet(
+    LinkedList memory list,
+    uint256 index,
+    bytes memory value
+  ) internal pure returns (bool success) {
+    if (index >= list.length) {
+      return false;
+    }
     Node memory node = getNode(list, index);
     node.value = value;
   }
@@ -216,7 +292,27 @@ library DynamicArray {
   }
 
   /**
-   * @notice inserts an array of values at the specified index
+   * @notice Tries to insert a new value at the specified index. If the index is out of bounds, it
+   * returns false and does not revert.
+   * @param list The list to insert the value in
+   * @param index The index to insert the value at
+   * @param value The value to insert
+   * @return success Whether the call was successful
+   */
+  function tryInsert(
+    LinkedList memory list,
+    uint256 index,
+    bytes memory value
+  ) internal pure returns (bool success) {
+    if (index > list.length) {
+      return false;
+    }
+    insert(list, index, value);
+    return true;
+  }
+
+  /**
+   * @notice Inserts an array of values at the specified index
    * @param list The list to insert the values in
    * @param index The index to insert the values at
    * @param values The values to insert
@@ -230,6 +326,26 @@ library DynamicArray {
     for (uint256 i = 0; i < values.length; i++) {
       insert(list, index + i, values[i]);
     }
+  }
+
+  /**
+   * @notice Tries to insert an array of values at the specified index. If the index is out of bounds,
+   * it returns false and does not revert.
+   * @param list The list to insert the values in
+   * @param index The index to insert the values at
+   * @param values The values to insert
+   * @return success Whether the call was successful
+   */
+  function tryInsertAll(
+    LinkedList memory list,
+    uint256 index,
+    bytes[] memory values
+  ) internal pure returns (bool success) {
+    if (index > list.length) {
+      return false;
+    }
+    insertAll(list, index, values);
+    return true;
   }
 
   /**
@@ -281,7 +397,7 @@ library DynamicArray {
   }
 
   /**
-   * @notice gets the index of the first occurance of the specified value
+   * @notice Gets the index of the first occurance of the specified value
    * @param list The list to search
    * @param value The value to search for
    * @return the index of the first occurance of the specified value, or -1 if the value is not in the list
@@ -299,7 +415,7 @@ library DynamicArray {
   }
 
   /**
-   * @notice gets the index of the last occurance of the specified value
+   * @notice Gets the index of the last occurance of the specified value
    * @param list The list to search
    * @param value The value to search for
    * @return the index of the last occurance of the specified value, or -1 if the value is not in the list
@@ -330,7 +446,7 @@ library DynamicArray {
   }
 
   /**
-   * @notice Removes the first occurance of the specified value
+   * @notice Removes the the element at the specified index
    * @param list The list to remove the value from
    * @param index The index of the value to remove
    */
@@ -355,7 +471,25 @@ library DynamicArray {
   }
 
   /**
-   * @notice creates a solidity array from the linked list
+   * @notice Tries to removes the the element at the specified index. Returns false
+   * if the index is out of bounds and does not revert.
+   * @param list The list to remove the value from
+   * @param index The index of the value to remove
+   * @return success true if the element was removed, false otherwise
+   */
+  function tryRemove(
+    LinkedList memory list,
+    uint256 index
+  ) internal pure returns (bool success) {
+    if (index >= list.length) {
+      return false;
+    }
+    remove(list, index);
+    return true;
+  }
+
+  /**
+   * @notice Creates a solidity array from the linked list
    * @param list the list to convert
    */
   function toArray(LinkedList memory list) internal pure returns (bytes[] memory) {
@@ -364,5 +498,249 @@ library DynamicArray {
       values[i] = getNode(list, i).value;
     }
     return values;
+  }
+
+  /**
+   * @notice Creates a new list that only contains the elements between the specified range of the original list
+   * @param list The list to slice
+   * @param _from The index of the first element to include
+   * @param _to The index of the last element to include
+   * @return the sliced list
+   */
+  function slice(
+    LinkedList memory list,
+    uint256 _from,
+    uint256 _to
+  ) internal pure returns (LinkedList memory) {
+    require(_from <= _to, 'Invalid slice range');
+    require(_to <= list.length, 'Slice range out of bounds');
+
+    LinkedList memory slicedList = deepCopy(list);
+
+    if (_from == 0) {
+      Node memory tail = getNode(slicedList, _to);
+      tail.next = new Node[](0);
+      slicedList.length = _to + 1;
+    } else {
+      Node memory newHead = getNode(slicedList, _from);
+      Node memory newTail = getNode(slicedList, _to);
+
+      Node[] memory newHeadPointer = buildNodePointer(newHead);
+      slicedList.head = newHeadPointer;
+
+      newTail.next = new Node[](0);
+      slicedList.length = _to - _from + 1;
+    }
+
+    return slicedList;
+  }
+
+  /**
+   * @notice Merges two lists together by appending the second list at the end of the first. The other list
+   * will be deep copied so it can be safely modified after this operation without affecting the result list.
+   * @param list The list to append to
+   * @param _other The list to be copied and appended
+   */
+  function merge(LinkedList memory list, LinkedList memory _other) internal pure {
+    LinkedList memory other = deepCopy(_other);
+    if (list.length == 0) {
+      list.head = other.head;
+      list.length = other.length;
+    } else if (other.length > 0) {
+      Node memory lastNode = getNode(list, list.length - 1);
+      Node memory otherHead = getNode(other, 0);
+
+      Node[] memory otherHeadPointer = buildNodePointer(otherHead);
+      lastNode.next = otherHeadPointer;
+
+      Node[] memory lastNodePointer = buildNodePointer(lastNode);
+      otherHead.previous = lastNodePointer;
+
+      list.length += other.length;
+    }
+  }
+
+  /**
+   * @notice Creates a new list that is a result of concatenation of the lists passed as arguments. Both lists
+   * will be deep copied so they can be safely modified after this operation without affecting the result list.
+   * @param list The first list to concatenate
+   * @param other The second list to concatenate
+   * @return newList A new list that is a result of concatenation of the lists passed as arguments
+   */
+  function concat(
+    LinkedList memory list,
+    LinkedList memory other
+  ) internal pure returns (LinkedList memory) {
+    LinkedList memory newList = deepCopy(list);
+
+    merge(newList, other);
+    return newList;
+  }
+
+  /**
+   * @notice Creates a deep copy of the list
+   * @param list The list to copy
+   * @return copiedList A copy of the original list
+   */
+  function deepCopy(
+    LinkedList memory list
+  ) internal pure returns (LinkedList memory copiedList) {
+    LinkedList memory newList;
+    newList.head = new Node[](list.head.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      push(newList, getNode(list, i).value);
+    }
+    return newList;
+  }
+
+  /**
+   * @notice Iterates over the list and calls the callback function for each element in order to check
+   * if the condition is met for at least one element. Callbacks are only executed until one of the callback
+   * invocations returns true.
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters.
+   */
+  function some(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (bool) callback
+  ) internal view returns (bool) {
+    for (uint256 i = 0; i < list.length; i++) {
+      if (callback(getNode(list, i).value, i)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @notice Iterates over the list and calls the callback function for each element in order to check
+   * if the condition is met for all elements. Callbacks are only executed until one of the callback
+   * invocations returns false.
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters.
+   * @return true If the callback returns true for all elements, false otherwise
+   */
+  function every(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (bool) callback
+  ) internal view returns (bool) {
+    for (uint256 i = 0; i < list.length; i++) {
+      if (!callback(getNode(list, i).value, i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @notice Iterates over the list and calls the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   */
+  function forEach(
+    LinkedList memory list,
+    function(bytes memory, uint256) callback
+  ) internal {
+    for (uint256 i = 0; i < list.length; i++) {
+      callback(getNode(list, i).value, i);
+    }
+  }
+
+  /**
+   * @notice Creates a new list with elements that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   */
+  function map(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (bytes memory) callback
+  ) internal view returns (LinkedList memory) {
+    LinkedList memory mappedList;
+    for (uint256 i = 0; i < list.length; i++) {
+      push(mappedList, callback(getNode(list, i).value, i));
+    }
+    return mappedList;
+  }
+
+  /**
+   * @notice Filters the list and creates a new list with the elements that match the condition
+   * @param list The list to filter
+   * @param callback The function to check if element matches the condition. It accepts the element and the index as parameters.
+   * @return filteredList A new list with the elements that match the condition
+   */
+  function filter(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (bool) callback
+  ) internal view returns (LinkedList memory) {
+    LinkedList memory filteredList;
+    for (uint256 i = 0; i < list.length; i++) {
+      if (callback(getNode(list, i).value, i)) {
+        push(filteredList, getNode(list, i).value);
+      }
+    }
+    return filteredList;
+  }
+
+  /**
+   * @notice Reduces the list to a single value by calling the callback function for each element
+   * @param list The list to reduce
+   * @param callback The function to call for each element. It accepts the accumulator, the current element
+   * and the index as parameters.
+   * @param initialValue The initial value of the accumulator
+   * @return accumulator The final value of the accumulator
+   */
+  function reduce(
+    LinkedList memory list,
+    function(bytes memory, bytes memory, uint256) view returns (bytes memory) callback,
+    bytes memory initialValue
+  ) internal view returns (bytes memory) {
+    bytes memory accumulator = initialValue;
+    for (uint256 i = 0; i < list.length; i++) {
+      accumulator = callback(accumulator, getNode(list, i).value, i);
+    }
+    return accumulator;
+  }
+
+  /**
+   * @notice Sorts the list using quicksort algorithm
+   * @param list The list to sort
+   * @param callback The function to compare two elements. It accepts two elements and returns:
+   * -1 if the first element is smaller than the second element
+   * 0 if the first element is equal to the second element
+   * 1 if the first element is greater than the second element
+   * @dev The input list is not copied, so the original list is modified
+   */
+  function sort(
+    LinkedList memory list,
+    function(bytes memory, bytes memory) view returns (int256) callback
+  ) internal view {
+    _quickSort(list, 0, int256(list.length - 1), callback);
+  }
+
+  function _quickSort(
+    LinkedList memory list,
+    int256 left,
+    int256 right,
+    function(bytes memory, bytes memory) view returns (int256) callback
+  ) private view {
+    int256 i = left;
+    int256 j = right;
+    if (i == j) return;
+    Node memory pivot = getNode(list, uint256(left + (right - left) / 2));
+    while (i <= j) {
+      while (callback(getNode(list, uint256(i)).value, pivot.value) == -1) i++;
+      while (callback(getNode(list, uint256(j)).value, pivot.value) == 1) j--;
+      if (i <= j) {
+        bytes memory iNodeValue = getNode(list, uint256(i)).value;
+        bytes memory jNodeValue = getNode(list, uint256(j)).value;
+        set(list, uint256(i), jNodeValue);
+        set(list, uint256(j), iNodeValue);
+        i++;
+        j--;
+      }
+    }
+    if (left < j) _quickSort(list, left, j, callback);
+    if (i < right) _quickSort(list, i, right, callback);
   }
 }
