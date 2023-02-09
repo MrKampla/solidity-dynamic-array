@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity >=0.4.0;
 
 /**
  * @notice Node is an element stored inside the linked list. Value is stored as bytes so it can be any basic
@@ -585,7 +585,7 @@ library DynamicArray {
   function deepCopy(
     LinkedList memory list
   ) internal pure returns (LinkedList memory copiedList) {
-    LinkedList memory newList;
+    LinkedList memory newList = empty();
     newList.head = new Node[](list.head.length);
     for (uint256 i = 0; i < list.length; i++) {
       push(newList, getNode(list, i).value);
@@ -656,7 +656,7 @@ library DynamicArray {
     LinkedList memory list,
     function(bytes memory, uint256) view returns (bytes memory) callback
   ) internal view returns (LinkedList memory) {
-    LinkedList memory mappedList;
+    LinkedList memory mappedList = empty();
     for (uint256 i = 0; i < list.length; i++) {
       push(mappedList, callback(getNode(list, i).value, i));
     }
@@ -673,7 +673,7 @@ library DynamicArray {
     LinkedList memory list,
     function(bytes memory, uint256) view returns (bool) callback
   ) internal view returns (LinkedList memory) {
-    LinkedList memory filteredList;
+    LinkedList memory filteredList = empty();
     for (uint256 i = 0; i < list.length; i++) {
       if (callback(getNode(list, i).value, i)) {
         push(filteredList, getNode(list, i).value);

@@ -1,6 +1,6 @@
 {
   "name": "solidity-dynamic-array",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "author": {
     "name": "Kamil Planer",
     "url": "https://github.com/MrKampla"
@@ -25,9 +25,11 @@
     "lint:sol": "solhint \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{md,sol,yml}\"",
     "prettier:write": "prettier --write \"**/*.{md,sol,yml}\"",
-    "docgen": "npx foundry-docgen"
+    "docgen": "npx foundry-docgen",
+    "slither": "slither . --exclude-dependencies --filter-paths \"lib|test\""
   },
   "devDependencies": {
+    "@types/node": "^18.13.0",
     "prettier": "^2.8.0",
     "prettier-plugin-solidity": "^1.0.0",
     "solhint": "^3.3.7",
