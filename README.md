@@ -660,6 +660,91 @@ Creates a new list with elements that are the result of calling the callback fun
 | list     | struct LinkedList                             | The list to iterate over                                                                                         |
 | callback | function (bytes,uint256) view returns (bytes) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
 
+**mapToUintArray**
+
+```solidity
+function mapToUintArray(struct LinkedList list, function (bytes,uint256) view returns (uint) callback) internal view returns (uint256[] memory)
+```
+
+Creates a new array of uint256 that are the result of calling the callback function for each element
+
+| Name     | Type                                            | Description                                                                                                      |
+| -------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                               | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (uint256) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+| Name | Type             | Description            |
+| ---- | ---------------- | ---------------------- |
+| [0]  | uint256[] memory | A new array of uint256 |
+
+**mapToIntArray**
+
+```solidity
+function mapToIntArray(struct LinkedList list, function (bytes,uint256) view returns (int) callback) internal view returns (int256[] memory)
+```
+
+Creates a new array of int256 that are the result of calling the callback function for each element
+
+| Name     | Type                                           | Description                                                                                                      |
+| -------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                              | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (int256) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+| Name | Type            | Description           |
+| ---- | --------------- | --------------------- |
+| [0]  | int256[] memory | A new array of int256 |
+
+**mapToBoolArray**
+
+```solidity
+function mapToBoolArray(struct LinkedList list, function (bytes,uint256) view returns (bool) callback) internal view returns (bool[] memory)
+```
+
+Creates a new array of boolean values that are the result of calling the callback function for each element
+
+| Name     | Type                                         | Description                                                                                                      |
+| -------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                            | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (bool) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+| Name | Type          | Description                   |
+| ---- | ------------- | ----------------------------- |
+| [0]  | bool[] memory | A new array of boolean values |
+
+**mapToAddressArray**
+
+```solidity
+function mapToAddressArray(struct LinkedList list, function (bytes,uint256) view returns (address) callback) internal view returns (address[] memory)
+```
+
+Creates a new array of addresses that are the result of calling the callback function for each element
+
+| Name     | Type                                            | Description                                                                                                      |
+| -------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                               | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (address) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+| Name | Type             | Description              |
+| ---- | ---------------- | ------------------------ |
+| [0]  | address[] memory | A new array of addresses |
+
+**mapToStringArray**
+
+```solidity
+function mapToStringArray(struct LinkedList list, function (bytes,uint256) view returns (string) callback) internal view returns (string[] memory)
+```
+
+Creates a new array of string values that are the result of calling the callback function for each element
+
+| Name     | Type                                           | Description                                                                                                      |
+| -------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| list     | struct LinkedList                              | The list to iterate over                                                                                         |
+| callback | function (bytes,uint256) view returns (string) | The function to call for each element. It accepts the element and the index as parameters and returns a new item |
+
+| Name | Type            | Description                  |
+| ---- | --------------- | ---------------------------- |
+| [0]  | string[] memory | A new array of string values |
+
 **filter**
 
 ```solidity

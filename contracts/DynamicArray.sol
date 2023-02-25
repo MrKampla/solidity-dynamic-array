@@ -664,6 +664,99 @@ library DynamicArray {
   }
 
   /**
+   * @notice Creates a new array of uint256 that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   * @return array A new array of uint256
+   */
+  function mapToUintArray(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (uint) callback
+  ) internal view returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      array[i] = callback(getNode(list, i).value, i);
+    }
+    return array;
+  }
+
+  /**
+   * @notice Creates a new array of int256 that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   * @return array A new array of int256
+   */
+  function mapToIntArray(
+    LinkedList memory list,
+    function(bytes memory, uint) view returns (int) callback
+  ) internal view returns (int[] memory) {
+    int[] memory array = new int[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      array[i] = callback(getNode(list, i).value, i);
+    }
+    return array;
+  }
+
+  /**
+   * @notice Creates a new array of boolean values that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   * @return array A new array of boolean values
+   */
+  function mapToBoolArray(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (bool) callback
+  ) internal view returns (bool[] memory) {
+    bool[] memory array = new bool[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      array[i] = callback(getNode(list, i).value, i);
+    }
+
+    return array;
+  }
+
+  /**
+   * @notice Creates a new array of addresses that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   * @return array A new array of addresses
+   */
+  function mapToAddressArray(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (address) callback
+  ) internal view returns (address[] memory) {
+    address[] memory array = new address[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      array[i] = callback(getNode(list, i).value, i);
+    }
+
+    return array;
+  }
+
+  /**
+   * @notice Creates a new array of string values that are the result of calling the callback function for each element
+   * @param list The list to iterate over
+   * @param callback The function to call for each element. It accepts the element and the index as parameters
+   * and returns a new item
+   * @return array A new array of string values
+   */
+  function mapToStringArray(
+    LinkedList memory list,
+    function(bytes memory, uint256) view returns (string memory) callback
+  ) internal view returns (string[] memory) {
+    string[] memory array = new string[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      array[i] = callback(getNode(list, i).value, i);
+    }
+
+    return array;
+  }
+
+  /**
    * @notice Filters the list and creates a new list with the elements that match the condition
    * @param list The list to filter
    * @param callback The function to check if element matches the condition. It accepts the element and the index as parameters.

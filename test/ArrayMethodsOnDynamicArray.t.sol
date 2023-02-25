@@ -190,6 +190,80 @@ contract ArrayMethodsOnDynamicArrayTest is Test {
     assertEq(abi.decode(mappedList.get(2), (uint256)), 6);
   }
 
+  function testMapToUintArray() public {
+    bytes[] memory values = new bytes[](3);
+    values[0] = abi.encode(uint256(1));
+    values[1] = abi.encode(uint256(2));
+    values[2] = abi.encode(uint256(3));
+
+    LinkedList memory list = DynamicArray.from(values);
+
+    uint256[] memory arrayOfUints = list.mapToUintArray(_mapEncodedItemToUint);
+
+    assertEq(arrayOfUints.length, 3);
+    assertEq(arrayOfUints[0], 1);
+    assertEq(arrayOfUints[1], 2);
+    assertEq(arrayOfUints[2], 3);
+  }
+
+  function testMapToIntArray() public {
+    bytes[] memory values = new bytes[](3);
+    values[0] = abi.encode(uint256(1));
+    values[1] = abi.encode(uint256(2));
+    values[2] = abi.encode(uint256(3));
+
+    LinkedList memory list = DynamicArray.from(values);
+
+    int256[] memory arrayOfUints = list.mapToIntArray(_mapEncodedItemToInt);
+
+    assertEq(arrayOfUints.length, 3);
+    assertEq(arrayOfUints[0], 1);
+    assertEq(arrayOfUints[1], 2);
+    assertEq(arrayOfUints[2], 3);
+  }
+
+  function testMapToBooleanArray() public {
+    bytes[] memory values = new bytes[](2);
+    values[0] = abi.encode(true);
+    values[1] = abi.encode(false);
+
+    LinkedList memory list = DynamicArray.from(values);
+
+    bool[] memory arrayOfUints = list.mapToBoolArray(_mapEncodedItemToBool);
+
+    assertEq(arrayOfUints.length, 2);
+    assertEq(arrayOfUints[0], true);
+    assertEq(arrayOfUints[1], false);
+  }
+
+  function testMapToAddressArray() public {
+    bytes[] memory values = new bytes[](2);
+    values[0] = abi.encode(address(0x1));
+    values[1] = abi.encode(address(0x2));
+
+    LinkedList memory list = DynamicArray.from(values);
+
+    address[] memory arrayOfUints = list.mapToAddressArray(_mapEncodedItemToAddress);
+
+    assertEq(arrayOfUints.length, 2);
+    assertEq(arrayOfUints[0], address(0x1));
+    assertEq(arrayOfUints[1], address(0x2));
+  }
+
+  function testMapToStringArray() public {
+    bytes[] memory values = new bytes[](2);
+    values[0] = 'abc';
+    values[1] = 'def';
+
+    LinkedList memory list = DynamicArray.from(values);
+
+    string[] memory arrayOfUints = list.mapToStringArray(_mapEncodedItemToString);
+
+    assertEq(arrayOfUints.length, 2);
+    assertEq(arrayOfUints[0], 'abc');
+    assertEq(arrayOfUints[1], 'def');
+  }
+
   function testReduce() public {
     bytes[] memory values = new bytes[](3);
     values[0] = abi.encode(uint256(1));
@@ -235,6 +309,33 @@ function _isAorY(bytes memory item, uint256) pure returns (bool) {
 function _double(bytes memory item, uint256) pure returns (bytes memory) {
   uint256 x = abi.decode(item, (uint256));
   return abi.encode(x * 2);
+}
+
+function _mapEncodedItemToUint(bytes memory item, uint256) pure returns (uint256) {
+  uint256 x = abi.decode(item, (uint256));
+  return x;
+}
+
+function _mapEncodedItemToInt(bytes memory item, uint256) pure returns (int256) {
+  int256 x = abi.decode(item, (int256));
+  return x;
+}
+
+function _mapEncodedItemToBool(bytes memory item, uint256) pure returns (bool) {
+  bool x = abi.decode(item, (bool));
+  return x;
+}
+
+function _mapEncodedItemToAddress(bytes memory item, uint256) pure returns (address) {
+  address x = abi.decode(item, (address));
+  return x;
+}
+
+function _mapEncodedItemToString(
+  bytes memory item,
+  uint256
+) pure returns (string memory) {
+  return string(item);
 }
 
 function _sum(bytes memory acc, bytes memory item, uint256) pure returns (bytes memory) {
