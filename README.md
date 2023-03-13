@@ -158,6 +158,40 @@ Creates a LinkedList from an array of bytes from calldata
 | ---- | ----------------- | --------------------------------------------------- |
 | [0]  | struct LinkedList | list The LinkedList created from the array of bytes |
 
+**fromSequence**
+
+```solidity
+function fromSequence(uint256 end) internal pure returns (struct LinkedList newList)
+```
+
+Creates a list of numbers from 0 to end
+
+| Name | Type    | Description                    |
+| ---- | ------- | ------------------------------ |
+| end  | uint256 | The number to end the sequence |
+
+| Name    | Type              | Description                            |
+| ------- | ----------------- | -------------------------------------- |
+| newList | struct LinkedList | The new list created from the sequence |
+
+**fromSubrange**
+
+```solidity
+function fromSubrange(struct LinkedList list, uint256 start, uint256 end) internal pure returns (struct LinkedList)
+```
+
+Creates a new list of numbers witch is a subset of the original list from specified part
+
+| Name  | Type              | Description                      |
+| ----- | ----------------- | -------------------------------- |
+| list  | struct LinkedList | The list to create a subset from |
+| start | uint256           | The index to start the subset    |
+| end   | uint256           | The index to end the subset      |
+
+| Name | Type              | Description                                  |
+| ---- | ----------------- | -------------------------------------------- |
+| [0]  | struct LinkedList | newList the new list created from the subset |
+
 **push**
 
 ```solidity
@@ -474,6 +508,23 @@ Gets the index of the last occurance of the specified value
 | ---- | ------ | --------------------------------------------------------------------------------------------- |
 | [0]  | int256 | The index of the last occurance of the specified value, or -1 if the value is not in the list |
 
+**find**
+
+```solidity
+function find(struct LinkedList list, function (bytes,uint256) pure returns (bool) callback) internal pure returns (bytes)
+```
+
+Finds the first occurance of the specified in the list
+
+| Name     | Type                                         | Description                                       |
+| -------- | -------------------------------------------- | ------------------------------------------------- |
+| list     | struct LinkedList                            | The list to search                                |
+| callback | function (bytes,uint256) pure returns (bool) | The callback to call for each element in the list |
+
+| Name | Type  | Description                                                                                                                   |
+| ---- | ----- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [0]  | bytes | the first value from the list for which the callback returns true, or an empty bytes array if the callback never returns true |
+
 **contains**
 
 ```solidity
@@ -533,6 +584,96 @@ Creates a solidity array from the linked list
 | Name | Type              | Description         |
 | ---- | ----------------- | ------------------- |
 | list | struct LinkedList | The list to convert |
+
+**asAddressArray**
+
+```solidity
+function asAddressArray(struct LinkedList list) internal pure returns (address[] result)
+```
+
+Creates a solidity array of addresses from the linked list
+
+_This function should only be called if the list contains addresses_
+
+| Name | Type              | Description         |
+| ---- | ----------------- | ------------------- |
+| list | struct LinkedList | the list to convert |
+
+| Name   | Type      | Description            |
+| ------ | --------- | ---------------------- |
+| result | address[] | the array of addresses |
+
+**asUintArray**
+
+```solidity
+function asUintArray(struct LinkedList list) internal pure returns (uint256[] result)
+```
+
+Creates a solidity array of unsigned integers from the linked list
+
+_This function should only be called if the list contains unsigned integers_
+
+| Name | Type              | Description         |
+| ---- | ----------------- | ------------------- |
+| list | struct LinkedList | the list to convert |
+
+| Name   | Type      | Description                    |
+| ------ | --------- | ------------------------------ |
+| result | uint256[] | the array of unsigned integers |
+
+**asIntArray**
+
+```solidity
+function asIntArray(struct LinkedList list) internal pure returns (int256[] result)
+```
+
+Creates a solidity array of integers from the linked list
+
+_This function should only be called if the list contains integers_
+
+| Name | Type              | Description         |
+| ---- | ----------------- | ------------------- |
+| list | struct LinkedList | the list to convert |
+
+| Name   | Type     | Description           |
+| ------ | -------- | --------------------- |
+| result | int256[] | the array of integers |
+
+**asBoolArray**
+
+```solidity
+function asBoolArray(struct LinkedList list) internal pure returns (bool[] result)
+```
+
+Creates a solidity array of boolean values from the linked list
+
+_This function should only be called if the list contains boolean values_
+
+| Name | Type              | Description         |
+| ---- | ----------------- | ------------------- |
+| list | struct LinkedList | the list to convert |
+
+| Name   | Type   | Description                 |
+| ------ | ------ | --------------------------- |
+| result | bool[] | the array of boolean values |
+
+**asStringArray**
+
+```solidity
+function asStringArray(struct LinkedList list) internal pure returns (string[] result)
+```
+
+Creates a solidity array of strings from the linked list
+
+_This function should only be called if the list contains strings_
+
+| Name | Type              | Description         |
+| ---- | ----------------- | ------------------- |
+| list | struct LinkedList | the list to convert |
+
+| Name   | Type     | Description          |
+| ------ | -------- | -------------------- |
+| result | string[] | the array of strings |
 
 **slice**
 
@@ -794,6 +935,17 @@ _The input list is not copied, so the original list is modified_
 | -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | list     | struct LinkedList                            | The list to sort                                                                                                                                                                                                                                      |
 | callback | function (bytes,bytes) view returns (int256) | The function to compare two elements. It accepts two elements and returns: -1 if the first element is smaller than the second element 0 if the first element is equal to the second element 1 if the first element is greater than the second element |
+
+## LinkedList struct can't be stored in storage
+
+When trying to add LinkedList as a storage variable in a contract, you'll encounter an error:
+
+```text
+Compiler run failed
+UnimplementedFeatureError: Copying of type struct Node memory[] memory to storage not yet supported.
+```
+
+Unfortunately, there is no way of storing nested structs directly in storage. What you can do is transform the LinkedList to an array through one of the `as...` methods (e.g. `asAddressArray` or `asUintArray`) and store the result array as a plain solidity array. Also, if you're storing structs in LinkedList, then you'd have to implement such casting function by yourself.
 
 ## Author
 

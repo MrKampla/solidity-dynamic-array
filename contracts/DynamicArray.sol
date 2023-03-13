@@ -99,6 +99,40 @@ library DynamicArray {
   }
 
   /**
+   * @notice Creates a list of numbers from 0 to end
+   * @param end The number to end the sequence
+   * @return newList The new list created from the sequence
+   */
+  function fromSequence(uint256 end) internal pure returns (LinkedList memory newList) {
+    newList = empty();
+    for (uint256 i = 0; i < end; i++) {
+      push(newList, abi.encode(i));
+    }
+    return newList;
+  }
+
+  /**
+   * @notice Creates a new list of numbers witch is a subset of the original list from specified part
+   * @param list The list to create a subset from
+   * @param start The index to start the subset (inclusive)
+   * @param end The index to end the subset (exclusive)
+   * @return newList the new list created from the subset
+   */
+  function fromSubrange(
+    LinkedList memory list,
+    uint256 start,
+    uint256 end
+  ) internal pure returns (LinkedList memory) {
+    require(start <= end, 'Start must be less than or equal to end');
+    require(end <= list.length, 'End must be less than or equal to list length');
+    LinkedList memory newList = empty();
+    for (uint256 i = start; i < end; i++) {
+      push(newList, get(list, i));
+    }
+    return newList;
+  }
+
+  /**
    * @notice Pushes a new value to the end of the list
    * @param list The list to push the value to
    * @param value The value to push to the list
@@ -433,6 +467,26 @@ library DynamicArray {
   }
 
   /**
+   * @notice Finds the first occurance of the specified in the list
+   * @param list The list to search
+   * @param callback The callback to call for each element in the list
+   * @return the first value from the list for which the callback returns true, or an empty bytes array
+   * if the callback never returns true
+   */
+  function find(
+    LinkedList memory list,
+    function(bytes memory, uint256) pure returns (bool) callback
+  ) internal pure returns (bytes memory) {
+    for (uint256 i = 0; i < list.length; i++) {
+      bytes memory value = get(list, i);
+      if (callback(value, i)) {
+        return value;
+      }
+    }
+    return bytes('');
+  }
+
+  /**
    * @notice Checks if the list contains the specified value
    * @param list The list to search
    * @param value The value to search for
@@ -492,12 +546,92 @@ library DynamicArray {
    * @notice Creates a solidity array from the linked list
    * @param list the list to convert
    */
-  function toArray(LinkedList memory list) internal pure returns (bytes[] memory) {
-    bytes[] memory values = new bytes[](list.length);
+  function toArray(LinkedList memory list) internal pure returns (bytes[] memory values) {
+    values = new bytes[](list.length);
     for (uint256 i = 0; i < list.length; i++) {
       values[i] = getNode(list, i).value;
     }
     return values;
+  }
+
+  /**
+   * @notice Creates a solidity array of addresses from the linked list
+   * @dev This function should only be called if the list contains addresses
+   * @param list the list to convert
+   * @return result the array of addresses
+   */
+  function asAddressArray(
+    LinkedList memory list
+  ) internal pure returns (address[] memory result) {
+    result = new address[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      result[i] = abi.decode(getNode(list, i).value, (address));
+    }
+    return result;
+  }
+
+  /**
+   * @notice Creates a solidity array of unsigned integers from the linked list
+   * @dev This function should only be called if the list contains unsigned integers
+   * @param list the list to convert
+   * @return result the array of unsigned integers
+   */
+  function asUintArray(
+    LinkedList memory list
+  ) internal pure returns (uint256[] memory result) {
+    result = new uint256[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      result[i] = abi.decode(getNode(list, i).value, (uint256));
+    }
+    return result;
+  }
+
+  /**
+   * @notice Creates a solidity array of integers from the linked list
+   * @dev This function should only be called if the list contains integers
+   * @param list the list to convert
+   * @return result the array of integers
+   */
+  function asIntArray(
+    LinkedList memory list
+  ) internal pure returns (int256[] memory result) {
+    result = new int256[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      result[i] = abi.decode(getNode(list, i).value, (int256));
+    }
+    return result;
+  }
+
+  /**
+   * @notice Creates a solidity array of boolean values from the linked list
+   * @dev This function should only be called if the list contains boolean values
+   * @param list the list to convert
+   * @return result the array of boolean values
+   */
+  function asBoolArray(
+    LinkedList memory list
+  ) internal pure returns (bool[] memory result) {
+    result = new bool[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      result[i] = abi.decode(getNode(list, i).value, (bool));
+    }
+    return result;
+  }
+
+  /**
+   * @notice Creates a solidity array of strings from the linked list
+   * @dev This function should only be called if the list contains strings
+   * @param list the list to convert
+   * @return result the array of strings
+   */
+  function asStringArray(
+    LinkedList memory list
+  ) internal pure returns (string[] memory result) {
+    result = new string[](list.length);
+    for (uint256 i = 0; i < list.length; i++) {
+      result[i] = abi.decode(getNode(list, i).value, (string));
+    }
+    return result;
   }
 
   /**

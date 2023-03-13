@@ -52,4 +52,20 @@ contract CreateDynamicArrayTest is Test {
     assertEq(listFromStorage.get(1), 'b');
     assertEq(listFromStorage.get(2), 'c');
   }
+
+  function testFromSequence() public {
+    LinkedList memory list = DynamicArray.fromSequence(3);
+    assertEq(list.length, 3);
+    assertEq(abi.decode(list.get(0), (uint256)), 0);
+    assertEq(abi.decode(list.get(1), (uint256)), 1);
+    assertEq(abi.decode(list.get(2), (uint256)), 2);
+  }
+
+  function testFromSubrange() public {
+    LinkedList memory list = DynamicArray.fromSequence(5);
+    LinkedList memory subrange = list.fromSubrange(1, 3);
+    assertEq(subrange.length, 2);
+    assertEq(abi.decode(subrange.get(0), (uint256)), 1);
+    assertEq(abi.decode(subrange.get(1), (uint256)), 2);
+  }
 }
