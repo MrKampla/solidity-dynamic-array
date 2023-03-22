@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import 'forge-std/Test.sol';
-import {DynamicArray, LinkedList, Node} from '../contracts/DynamicArray.sol';
+import {DynamicArray, LinkedList, Node} from 'contracts/DynamicArray.sol';
 
 contract StoringDynamicArrayTest is Test {
   using DynamicArray for LinkedList;

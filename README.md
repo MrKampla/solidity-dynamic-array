@@ -6,9 +6,10 @@
 
 ## Description
 
-Have you ever wanted to create a resizable, in-memory Solidity array? If you answered “yes”, then this library is for you.
+Have you ever wanted to create a resizable, in-memory Solidity array? Or a dynamic in-memory mapping? If you answered “yes”, then this library is for you.
 In order to create an in-memory Solidity Array, you have to specify its length upfront in order for the compiler to allocate enough memory. With solidity-dynamic-array package, you can use DynamicArray library together with LinkedList struct in order to fully utilize dynamic, resizable arrays.
 I was aiming to reproduce the JavaScript ES6 array methods, so you can enjoy functions such as map, filter and reduce etc. that we all know and love.
+Moreover, this package exports another dynamic in-memory data structure that is not available in native Solidity: a fully in-memory mapping object! Map struct uses dynamic arrays under the hood and thanks to that, you can create and edit mappings fully in memory.
 
 ## Install
 
@@ -17,6 +18,8 @@ or
 `yarn add solidity-dynamic-array`
 
 ## Usage
+
+### Dynamic Array
 
 ```solidity
 pragma solidity ^0.8.16;
@@ -63,6 +66,51 @@ contract MyContract {
 }
 ```
 
+### Array Map
+
+```solidity
+pragma solidity ^0.8.16;
+
+import { ArrayMap, Map } from 'solidity-dynamic-array/contracts/ArrayMap.sol';
+
+contract MyContract {
+  // don't forget about "using" statement!
+  using ArrayMap for Map;
+
+  function createDynamicInMemoryMap() public pure {
+    // create empty Map, you can also create a map based on array values - look up methods starting with `from`
+    Map memory map = ArrayMap.empty();
+
+    map.set('a', 'b');
+    map.set('c', 'd');
+    map.set('e', 'f');
+    // size will be dynamically calculated
+    require(map.size() == 3);
+    // you can also remove elements
+    map.remove('c');
+    require(map.size() == 2);
+  }
+
+  struct MyStruct {
+    uint256 myUint;
+    string myString;
+  }
+
+  // Map can also store structs!
+  function storeStructInDynamicInMemoryMap() public pure {
+    Map memory map = ArrayMap.empty();
+    // map only accepts bytes values so don't forget to encode your struct before storing it
+    map.set('a', abi.encode(MyStruct(1337, 'example')));
+
+    // when retreiving a struct from list, don't forget to decode the item
+    MyStruct memory decodedStruct = abi.decode(map.get('a'), (MyStruct));
+
+    require(decodedStruct.myUint == 1337);
+    require(keccak256(abi.encodePacked(decodedStruct.myString)) == keccak256('example'));
+  }
+}
+```
+
 ## DynamicArray Library
 
 A library for managing dynamic in-memory arrays of bytes. This can hold any basic type or struct. Due to lack of
@@ -70,6 +118,20 @@ generics in Solidity, this library uses a workaround to manage dynamic arrays of
 is storing an arbitrary amount of bytes so in order to store a struct, it has to be encoded before storing (using abi.encode)
 and decoded after it is retreived from the list (using abi.decode). This library is meant to be used with the LinkedList
 struct. For brevity, it is recommended to add a 'using' statement to your contract: `using DynamicArray for LinkedList;`
+
+## ArrayMap Library
+
+The ArrayMap library provides a way to store a mapping of keys to values where the keys are dynamic arrays of bytes.
+Like the DynamicArray library, this library uses the workaround of storing the keys and values as bytes and encoding/decoding them using abi.encode/abi.decode. The library is meant to be used with the Map struct.
+
+The library provides functions to insert, update, remove, and get values from the mapping. It also provides functions
+to retrieve the keys and values, and get the size of the mapping.
+
+Similar to the DynamicArray library, it is recommended to add a 'using' statement to your contract to make usage of this library more convenient. For example: `using ArrayMap for Map`;
+
+Because of the fact that keys and values are stored in a dynamic in-memory array, the set and lookup times are O(n) where `n` is the number of elements in the map.
+_Please note that this implementation is not optimized for big maps. Proceed with caution when using it with large
+amounts of data and check the gas usage._
 
 ## Structs
 
@@ -96,7 +158,18 @@ struct LinkedList {
 }
 ```
 
-## methods
+### Map
+
+Map is a key-value store consisting of two linked lists. Each key is stored in the `keys` list, and its corresponding value is stored in the `values` list at the same index. This allows for efficient retrieval and deletion of key-value pairs, as well as iteration over the map. Please note that the Map struct may not be suitable for large mappings due to gas usage. Each key-value pair added to the map incurs a certain amount of gas cost, which can become significant for large mappings, as array implementation of a mapping is not optimized for an efficient lookup and insert operations (it's O(n) time complexity).
+
+```solidity
+struct Map {
+  LinkedList keys;
+  LinkedList values;
+}
+```
+
+## DynamicArray methods
 
 **empty**
 
@@ -946,6 +1019,209 @@ UnimplementedFeatureError: Copying of type struct Node memory[] memory to storag
 ```
 
 Unfortunately, there is no way of storing nested structs directly in storage. What you can do is transform the LinkedList to an array through one of the `as...` methods (e.g. `asAddressArray` or `asUintArray`) and store the result array as a plain solidity array. Also, if you're storing structs in LinkedList, then you'd have to implement such casting function by yourself.
+
+## ArrayMap methods
+
+**empty**
+
+```solidity
+function empty() internal pure returns (struct Map)
+```
+
+Creates an empty map.
+
+| Name | Type       | Description   |
+| ---- | ---------- | ------------- |
+| [0]  | struct Map | An empty map. |
+
+**fromKeyValuePairs**
+
+```solidity
+function fromKeyValuePairs(bytes[][] keyValuePairs) internal pure returns (struct Map)
+```
+
+Creates a map from an unbounded list of key-value pairs.
+
+| Name          | Type      | Description                |
+| ------------- | --------- | -------------------------- |
+| keyValuePairs | bytes[][] | A list of key-value pairs. |
+
+| Name | Type       | Description                     |
+| ---- | ---------- | ------------------------------- |
+| [0]  | struct Map | A map with the key-value pairs. |
+
+**fromEntries**
+
+```solidity
+function fromEntries(bytes[] keys, bytes[] values) internal pure returns (struct Map)
+```
+
+Creates a map from two separate lists of keys and values.
+
+| Name   | Type    | Description       |
+| ------ | ------- | ----------------- |
+| keys   | bytes[] | A list of keys.   |
+| values | bytes[] | A list of values. |
+
+| Name | Type       | Description                     |
+| ---- | ---------- | ------------------------------- |
+| [0]  | struct Map | A map with the key-value pairs. |
+
+**set**
+
+```solidity
+function set(struct Map map, bytes key, bytes value) internal pure
+```
+
+Sets a key-value pair in the map. If the key already exists, the value is updated. Otherwise, a new key-value
+pair is added.
+
+| Name  | Type       | Description       |
+| ----- | ---------- | ----------------- |
+| map   | struct Map | The map to update |
+| key   | bytes      | The key to set    |
+| value | bytes      | The value to set  |
+
+**get**
+
+```solidity
+function get(struct Map map, bytes key) internal pure returns (bytes)
+```
+
+Gets the value associated with the key. If the key does not exist, the function reverts.
+
+| Name | Type       | Description                   |
+| ---- | ---------- | ----------------------------- |
+| map  | struct Map | The map to get the value from |
+| key  | bytes      | The key to get the value for  |
+
+| Name | Type  | Description                       |
+| ---- | ----- | --------------------------------- |
+| [0]  | bytes | The value associated with the key |
+
+**tryGet**
+
+```solidity
+function tryGet(struct Map map, bytes key) internal pure returns (bytes)
+```
+
+Gets the value associated with the key. If the key does not exist, the function returns an empty bytes value.
+
+| Name | Type       | Description                   |
+| ---- | ---------- | ----------------------------- |
+| map  | struct Map | The map to get the value from |
+| key  | bytes      | The key to get the value for  |
+
+| Name | Type  | Description                       |
+| ---- | ----- | --------------------------------- |
+| [0]  | bytes | The value associated with the key |
+
+**remove**
+
+```solidity
+function remove(struct Map map, bytes key) internal pure
+```
+
+Removes a key-value pair from the map. If the key does not exist, the function does nothing.
+
+| Name | Type       | Description                               |
+| ---- | ---------- | ----------------------------------------- |
+| map  | struct Map | The map to remove the key-value pair from |
+| key  | bytes      | The key to remove                         |
+
+**contains**
+
+```solidity
+function contains(struct Map map, bytes key) internal pure returns (bool)
+```
+
+Checks if the map contains a key.
+
+| Name | Type       | Description      |
+| ---- | ---------- | ---------------- |
+| map  | struct Map | The map to check |
+| key  | bytes      | The key to check |
+
+| Name | Type | Description                                       |
+| ---- | ---- | ------------------------------------------------- |
+| [0]  | bool | True if the map contains the key, false otherwise |
+
+**size**
+
+```solidity
+function size(struct Map map) internal pure returns (uint256)
+```
+
+Gets the number of key-value pairs in the map.
+
+| Name | Type       | Description                |
+| ---- | ---------- | -------------------------- |
+| map  | struct Map | The map to get the size of |
+
+| Name | Type    | Description                              |
+| ---- | ------- | ---------------------------------------- |
+| [0]  | uint256 | The number of key-value pairs in the map |
+
+**getKeys**
+
+```solidity
+function getKeys(struct Map map) internal pure returns (bytes[])
+```
+
+Gets the keys of the map.
+
+| Name | Type       | Description                  |
+| ---- | ---------- | ---------------------------- |
+| map  | struct Map | The map to get the keys from |
+
+| Name | Type    | Description                  |
+| ---- | ------- | ---------------------------- |
+| [0]  | bytes[] | The array of keys of the map |
+
+**getValues**
+
+```solidity
+function getValues(struct Map map) internal pure returns (bytes[])
+```
+
+Gets the values of the map.
+
+| Name | Type       | Description                    |
+| ---- | ---------- | ------------------------------ |
+| map  | struct Map | The map to get the values from |
+
+| Name | Type    | Description                    |
+| ---- | ------- | ------------------------------ |
+| [0]  | bytes[] | The array of values of the map |
+
+**clear**
+
+```solidity
+function clear(struct Map map) internal pure
+```
+
+Clears the map by removing all key-value pairs.
+
+| Name | Type       | Description      |
+| ---- | ---------- | ---------------- |
+| map  | struct Map | The map to clear |
+
+**entries**
+
+```solidity
+function entries(struct Map map) internal pure returns (bytes[] _keys, bytes[] _values)
+```
+
+Gets the key-value pairs of the map.
+
+| Name | Type       | Description                             |
+| ---- | ---------- | --------------------------------------- |
+| map  | struct Map | The map to get the key-value pairs from |
+
+| Name     | Type    | Description                    |
+| -------- | ------- | ------------------------------ |
+| \_keys   | bytes[] | The array of keys of the map   |
+| \_values | bytes[] | The array of values of the map |
 
 ## Author
 
